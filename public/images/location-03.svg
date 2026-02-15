@@ -1,0 +1,8 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2A2D38"/><stop offset="100%" style="stop-color:#1C1F2D"/></linearGradient></defs>
+  <rect width="400" height="300" fill="url(#g)" />
+  <ellipse cx="200" cy="100" rx="70" ry="40" fill="#B8E6DB" opacity="0.25" />
+  <rect x="100" y="150" width="200" height="80" fill="#B8E6DB" opacity="0.15" />
+  <text x="200" y="260" font-size="24" font-weight="bold" text-anchor="middle" fill="#E0E8FF" opacity="0.8">KN</text>
+  <text x="200" y="285" font-size="12" text-anchor="middle" fill="#E0E8FF" opacity="0.5">INDUSTRIAL</text>
+</svg>
