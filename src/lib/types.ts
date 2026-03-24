@@ -34,6 +34,10 @@ export interface UrbexLocation {
   thumbnailImage: string;
   evidence: EvidenceSource[];
   communityNotes: CommunityNote[];
+  // Fields from DB
+  author?: string;
+  favorite?: boolean;
+  region?: string;
 }
 
 export interface LocationFilters {

@@ -84,6 +84,18 @@ export function MapView({
 
     // Add new markers
     locations.forEach((location) => {
+      // Skip locations with invalid or missing coordinates
+      if (
+        !location.latitude ||
+        !location.longitude ||
+        location.latitude < -90 ||
+        location.latitude > 90 ||
+        location.longitude < -180 ||
+        location.longitude > 180
+      ) {
+        return;
+      }
+
       const isVerified = location.status === "verified";
       const isSelected = selectedLocationId === location.id;
       const el = createPinElement(isVerified, isSelected);
@@ -128,8 +140,8 @@ export function MapView({
               text-transform: uppercase;
               letter-spacing: 0.5px;
             ">${isVerified ? "Verified" : "Unverified"}</span>
-            <span style="color: #64748b; font-size: 11px;">•</span>
-            <span style="color: #94a3b8; font-size: 11px;">${location.confidence}% confidence</span>
+            ${location.confidence ? `<span style="color: #64748b; font-size: 11px;">•</span>
+            <span style="color: #94a3b8; font-size: 11px;">${location.confidence}% confidence</span>` : ""}
           </div>
           <div style="
             color: #94a3b8;

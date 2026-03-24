@@ -21,14 +21,14 @@ export function LocationCard({
   onClick,
 }: LocationCardProps) {
   const [imageError, setImageError] = useState(false);
-  const lastUpdatedDate = new Date(location.lastUpdated).toLocaleDateString(
-    "en-US",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }
-  );
+  const hasImage = !!location.thumbnailImage;
+  const lastUpdatedDate = location.lastUpdated
+    ? new Date(location.lastUpdated).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 
   return (
     <motion.div
@@ -47,7 +47,7 @@ export function LocationCard({
             className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted"
             whileHover={{ scale: 1.05 }}
           >
-            {imageError ? (
+            {!hasImage || imageError ? (
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <ImageOff className="h-6 w-6 text-muted-foreground" />
               </div>
@@ -96,20 +96,24 @@ export function LocationCard({
 
             {/* Footer */}
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {lastUpdatedDate}
-              </div>
-              <div className="flex gap-1 flex-wrap justify-end">
-                {location.tags.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-1.5 py-0.5 rounded bg-secondary/50 text-xs"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {lastUpdatedDate && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {lastUpdatedDate}
+                </div>
+              )}
+              {location.tags && location.tags.length > 0 && (
+                <div className="flex gap-1 flex-wrap justify-end">
+                  {location.tags.slice(0, 2).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-1.5 py-0.5 rounded bg-secondary/50 text-xs"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

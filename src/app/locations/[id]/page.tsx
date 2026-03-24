@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, ArrowLeft, Loader, ImageOff } from "lucide-react";
-import { useLocation } from "@/lib/api/queries";
+import { MapPin, ArrowLeft, Loader, ImageOff, Sparkles } from "lucide-react";
+import { useLocation, useLocationSummary } from "@/lib/api/queries";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -16,6 +16,7 @@ export default function LocationDetailPage() {
   const params = useParams();
   const locationId = params.id as string;
   const { data: location, isLoading } = useLocation(locationId);
+  const { data: aiSummary, isLoading: isSummaryLoading } = useLocationSummary(locationId);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [heroError, setHeroError] = useState(false);
 
@@ -47,14 +48,14 @@ export default function LocationDetailPage() {
     );
   }
 
-  const lastUpdatedDate = new Date(location.lastUpdated).toLocaleDateString(
-    "en-US",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
-  );
+  const hasHeroImage = !!location.heroImage;
+  const lastUpdatedDate = location.lastUpdated
+    ? new Date(location.lastUpdated).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   const container = {
     hidden: { opacity: 0 },
@@ -97,7 +98,7 @@ export default function LocationDetailPage() {
         transition={{ duration: 0.3 }}
         className="relative h-80 overflow-hidden bg-muted"
       >
-        {heroError ? (
+        {!hasHeroImage || heroError ? (
           <div className="w-full h-full flex items-center justify-center bg-muted">
             <ImageOff className="h-16 w-16 text-muted-foreground" />
           </div>
@@ -160,38 +161,73 @@ export default function LocationDetailPage() {
               <span className="text-2xl font-bold text-primary">{location.confidence}%</span>
             </div>
             <Progress value={location.confidence} className="h-2" />
-            <p className="text-xs text-muted-foreground">
-              Last updated {lastUpdatedDate}
-            </p>
+            {lastUpdatedDate && (
+              <p className="text-xs text-muted-foreground">
+                Last updated {lastUpdatedDate}
+              </p>
+            )}
           </div>
         </motion.div>
 
         {/* Description */}
-        <motion.div variants={item} className="prose prose-invert max-w-none mb-12">
-          <p className="text-lg text-foreground/90 leading-relaxed">{location.description}</p>
+        {location.description && (
+          <motion.div variants={item} className="prose prose-invert max-w-none mb-8">
+            <p className="text-lg text-foreground/90 leading-relaxed">{location.description}</p>
+          </motion.div>
+        )}
+
+        {/* AI Summary */}
+        <motion.div variants={item} className="glass rounded-lg p-6 mb-12 border border-primary/20">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-sm uppercase tracking-wide text-primary">
+              AI Summary
+            </h3>
+          </div>
+          {isSummaryLoading ? (
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+                <Loader className="h-4 w-4" />
+              </motion.div>
+              <span className="text-sm">Generating summary...</span>
+            </div>
+          ) : aiSummary ? (
+            <div className="space-y-3 text-foreground/85 leading-relaxed">
+              {aiSummary.split("\n\n").map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Summary unavailable.</p>
+          )}
         </motion.div>
 
         {/* Tags */}
-        <motion.div variants={item} className="mb-12">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-            Tags
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {location.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="capitalize">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </motion.div>
+        {location.tags && location.tags.length > 0 && (
+          <motion.div variants={item} className="mb-12">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+              Tags
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {location.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="capitalize">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Evidence & Community Notes */}
-        <motion.div variants={item} className="mb-12">
-          <EvidenceAccordion
-            evidence={location.evidence}
-            communityNotes={location.communityNotes}
-          />
-        </motion.div>
+        {((location.evidence && location.evidence.length > 0) ||
+          (location.communityNotes && location.communityNotes.length > 0)) && (
+          <motion.div variants={item} className="mb-12">
+            <EvidenceAccordion
+              evidence={location.evidence || []}
+              communityNotes={location.communityNotes || []}
+            />
+          </motion.div>
+        )}
 
         {/* Safety Callout */}
         <motion.div

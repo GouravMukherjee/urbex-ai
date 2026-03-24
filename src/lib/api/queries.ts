@@ -16,6 +16,7 @@ export const locationKeys = {
     [...locationKeys.lists(), { ...filters }] as const,
   details: () => [...locationKeys.all, "detail"] as const,
   detail: (id: string) => [...locationKeys.details(), id] as const,
+  summary: (id: string) => [...locationKeys.all, "summary", id] as const,
 };
 
 /**
@@ -38,6 +39,23 @@ export function useLocation(id: string) {
     queryFn: () => getLocationById(id),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook: Fetch an AI-generated summary for a location.
+ */
+export function useLocationSummary(id: string) {
+  return useQuery({
+    queryKey: locationKeys.summary(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/locations/${encodeURIComponent(id)}/summary`);
+      if (!res.ok) throw new Error("Failed to fetch summary");
+      const data = await res.json();
+      return data.summary as string;
+    },
+    enabled: !!id,
+    staleTime: 30 * 60 * 1000, // 30 minutes — summaries don't change often
   });
 }
 
