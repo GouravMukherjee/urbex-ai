@@ -181,7 +181,7 @@ export default function LocationDetailPage() {
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-sm uppercase tracking-wide text-primary">
-              AI Summary
+              AI Description
             </h3>
           </div>
           {isSummaryLoading ? (
