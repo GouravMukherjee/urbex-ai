@@ -9,8 +9,16 @@ const DIFFICULTY_MAP: Record<number, string> = {
   5: "hard",
 };
 
+function streetViewUrl(lat: number, lng: number, width: number, height: number) {
+  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!key || !lat || !lng) return "";
+  return `https://maps.googleapis.com/maps/api/streetview?size=${width}x${height}&location=${lat},${lng}&fov=90&pitch=10&key=${key}`;
+}
+
 function mapRow(row: Record<string, unknown>) {
   const difficulty = typeof row.difficulty === "number" ? row.difficulty : 3;
+  const lat = Number(row.lat) || 0;
+  const lng = Number(row.lng) || 0;
   return {
     id: row.id as string,
     name: row.name as string,
@@ -18,15 +26,15 @@ function mapRow(row: Record<string, unknown>) {
     status: "unverified" as const,
     difficulty: (DIFFICULTY_MAP[difficulty] || "moderate") as "easy" | "moderate" | "hard",
     description: (row.description as string) || "",
-    latitude: Number(row.lat) || 0,
-    longitude: Number(row.lng) || 0,
+    latitude: lat,
+    longitude: lng,
     confidence: 50,
     lastUpdated: row.date_added
       ? new Date(row.date_added as string).toISOString()
       : new Date().toISOString(),
     tags: [row.category as string].filter(Boolean),
-    heroImage: "",
-    thumbnailImage: "",
+    heroImage: streetViewUrl(lat, lng, 1280, 720),
+    thumbnailImage: streetViewUrl(lat, lng, 400, 300),
     evidence: [],
     communityNotes: [],
     author: (row.author as string) || "",
